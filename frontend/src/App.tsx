@@ -8,6 +8,9 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import AddRecipe from './pages/AddRecipe'
 import RecipeDetail from './pages/RecipeDetail'
+import MyRecipes from './pages/MyRecipes'
+import Favorites from './pages/Favorites'
+import EditRecipe from './pages/EditRecipe'
 
 const queryClient = new QueryClient()
 
@@ -26,6 +29,9 @@ function App() {
                   <Route path="/register" element={<Register />} />
                   <Route path="/add-recipe" element={<AddRecipe />} />
                   <Route path="/recipe/:id" element={<RecipeDetail />} />
+                  <Route path="/my-recipes" element={<MyRecipes />} />
+                  <Route path="/favorites" element={<Favorites />} />
+                  <Route path="/edit-recipe/:id" element={<EditRecipe />} />
                 </Routes>
               </Box>
             </Box>

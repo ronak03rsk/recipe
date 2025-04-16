@@ -1,43 +1,86 @@
 # Recipe Sharing Platform
 
-A modern recipe sharing platform built with Flask, MongoDB, and React+TypeScript.
+A full-stack web application for sharing and discovering recipes. Built with Flask, MongoDB, React, and TypeScript.
 
 ## Features
 
-- User Authentication (JWT-based)
-- Recipe Creation and Sharing
-- Real-time Recipe Updates
-- Search and Filter Recipes
-- Responsive Modern UI
-- Image Upload Support
+- User authentication (login/register)
+- Create, read, update, and delete recipes
+- Search recipes by title, ingredients, or description
+- Filter recipes by cuisine type
+- Responsive design for all devices
 
 ## Tech Stack
 
 ### Backend
 - Flask (Python)
-- MongoDB
+- MongoDB Atlas
 - JWT Authentication
 - Flask-CORS
 
 ### Frontend
-- React 18
+- React
 - TypeScript
-- Vite
-- Tailwind CSS
+- Chakra UI
 - React Query
-- React Router
 - Axios
 
-## Getting Started
+## Setup
 
 ### Backend Setup
-1. Navigate to `backend` directory
-2. Create a virtual environment: `python -m venv venv`
-3. Activate venv: `.\venv\Scripts\activate`
-4. Install dependencies: `pip install -r requirements.txt`
-5. Run server: `python app.py`
+1. Navigate to the backend directory:
+   ```bash
+   cd backend
+   ```
+
+2. Create and activate virtual environment:
+   ```bash
+   python -m venv venv
+   venv\Scripts\activate  # Windows
+   ```
+
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. Set up environment variables in `.env`:
+   ```
+   MONGODB_URI=your_mongodb_uri
+   JWT_SECRET=your_jwt_secret
+   PORT=5000
+   ```
+
+5. Run the server:
+   ```bash
+   python app.py
+   ```
 
 ### Frontend Setup
-1. Navigate to `frontend` directory
-2. Install dependencies: `npm install`
-3. Run dev server: `npm run dev`
+1. Navigate to the frontend directory:
+   ```bash
+   cd frontend
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Run the development server:
+   ```bash
+   npm run dev
+   ```
+
+## API Endpoints
+
+### Authentication
+- POST `/api/auth/register` - Register a new user
+- POST `/api/auth/login` - Login user
+
+### Recipes
+- GET `/api/recipes/search` - Search recipes
+- POST `/api/recipes` - Create new recipe
+- GET `/api/recipes/:id` - Get recipe by ID
+- PUT `/api/recipes/:id` - Update recipe
+- DELETE `/api/recipes/:id` - Delete recipe

@@ -1,6 +1,7 @@
-import { Box, Flex, Button, Link as ChakraLink, Text } from '@chakra-ui/react';
+import { Box, Flex, Button, Link as ChakraLink, Text, Container, HStack, Avatar, Menu, MenuButton, MenuList, MenuItem, Icon } from '@chakra-ui/react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { FiPlusCircle, FiHeart, FiUser, FiLogOut } from 'react-icons/fi';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -12,55 +13,105 @@ const Navbar = () => {
   };
 
   return (
-    <Box bg="teal.500" px={4} position="sticky" top={0} zIndex={1}>
-      <Flex h={16} alignItems="center" justifyContent="space-between" maxW="1200px" mx="auto">
-        <Flex alignItems="center">
-          <ChakraLink as={RouterLink} to="/">
-            <Text fontSize="xl" fontWeight="bold" color="white">
+    <Box 
+      bg="white" 
+      boxShadow="sm" 
+      position="sticky" 
+      top={0} 
+      zIndex={1000}
+      borderBottom="1px"
+      borderColor="gray.100"
+    >
+      <Container maxW="container.xl" py={3}>
+        <Flex justify="space-between" align="center">
+          <ChakraLink 
+            as={RouterLink} 
+            to="/"
+            _hover={{ textDecoration: 'none' }}
+          >
+            <Text 
+              fontSize="2xl" 
+              fontWeight="bold" 
+              bgGradient="linear(to-r, teal.500, teal.300)"
+              bgClip="text"
+            >
               RecipeShare
             </Text>
           </ChakraLink>
-        </Flex>
 
-        <Flex alignItems="center" gap={4}>
-          <ChakraLink as={RouterLink} to="/" color="white">
-            Home
-          </ChakraLink>
-          
-          {user ? (
-            <>
-              <ChakraLink as={RouterLink} to="/add-recipe" color="white">
-                Add Recipe
-              </ChakraLink>
-              <Button
-                onClick={handleLogout}
-                colorScheme="teal"
-                variant="outline"
-                color="white"
-                _hover={{ bg: 'teal.600' }}
-              >
-                Logout
-              </Button>
-              <Text color="white" fontWeight="medium">
-                Hi, {user.name}
-              </Text>
-            </>
-          ) : (
-            <>
-              <ChakraLink as={RouterLink} to="/login">
-                <Button colorScheme="teal" variant="outline" color="white" _hover={{ bg: 'teal.600' }}>
+          <HStack spacing={8}>
+            <ChakraLink 
+              as={RouterLink} 
+              to="/" 
+              color="gray.600"
+              fontWeight="medium"
+              _hover={{ color: 'teal.500', textDecoration: 'none' }}
+            >
+              Discover
+            </ChakraLink>
+            
+            {user ? (
+              <>
+                <Button
+                  as={RouterLink}
+                  to="/add-recipe"
+                  colorScheme="teal"
+                  leftIcon={<Icon as={FiPlusCircle} />}
+                  size="md"
+                >
+                  Add Recipe
+                </Button>
+                <Menu>
+                  <MenuButton>
+                    <Avatar size="sm" name={user.name} bg="teal.500" />
+                  </MenuButton>
+                  <MenuList>
+                    <MenuItem 
+                      as={RouterLink} 
+                      to="/my-recipes"
+                      icon={<Icon as={FiUser} />}
+                    >
+                      My Recipes
+                    </MenuItem>
+                    <MenuItem 
+                      as={RouterLink} 
+                      to="/favorites"
+                      icon={<Icon as={FiHeart} />}
+                    >
+                      Favorites
+                    </MenuItem>
+                    <MenuItem 
+                      onClick={handleLogout}
+                      icon={<Icon as={FiLogOut} />}
+                      color="red.500"
+                    >
+                      Logout
+                    </MenuItem>
+                  </MenuList>
+                </Menu>
+              </>
+            ) : (
+              <HStack spacing={4}>
+                <Button
+                  as={RouterLink}
+                  to="/login"
+                  variant="ghost"
+                  colorScheme="teal"
+                >
                   Login
                 </Button>
-              </ChakraLink>
-              <ChakraLink as={RouterLink} to="/register">
-                <Button colorScheme="teal" variant="solid" bg="white" color="teal.500">
-                  Register
+                <Button
+                  as={RouterLink}
+                  to="/register"
+                  colorScheme="teal"
+                >
+                  Sign Up
                 </Button>
-              </ChakraLink>
-            </>
-          )}
+              </HStack>
+            )}
+          </HStack>
         </Flex>
-      </Flex>
+      </Container>
     </Box>
   );
 };

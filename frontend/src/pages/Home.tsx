@@ -16,10 +16,12 @@ import {
   Center,
 } from '@chakra-ui/react';
 import { SearchIcon } from '@chakra-ui/icons';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import RecipeCard from '../components/RecipeCard';
 import { debounce } from 'lodash';
+import { API_BASE_URL } from '../config';
+import { useAuth } from '../contexts/AuthContext';
 
 interface Recipe {
   _id: string;
@@ -29,6 +31,15 @@ interface Recipe {
   cuisine_type: string;
   cooking_time: string;
   difficulty: string;
+  user_id: string;
+  user_name: string;
+  likes: string[];
+  comments: Array<{
+    content: string;
+    user_id: string;
+    user_name: string;
+    created_at: string;
+  }>;
 }
 
 const cuisineOptions = [
@@ -45,6 +56,8 @@ const Home = () => {
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [cuisineType, setCuisineType] = useState('');
   const toast = useToast();
+  const auth = useAuth();
+  const queryClient = useQueryClient();
 
   // Debounce search query
   useEffect(() => {
@@ -58,7 +71,7 @@ const Home = () => {
     };
   }, [searchQuery]);
 
-  const { data: recipes = [], isLoading, error } = useQuery<Recipe[]>({
+  const { data: recipes = [], isLoading, isError } = useQuery<Recipe[], Error>({
     queryKey: ['recipes', debouncedQuery, cuisineType],
     queryFn: async () => {
       try {
@@ -66,14 +79,17 @@ const Home = () => {
         if (debouncedQuery) params.append('q', debouncedQuery);
         if (cuisineType) params.append('cuisine', cuisineType);
         
-        const response = await axios.get<Recipe[]>(`http://localhost:5000/api/recipes/search?${params}`);
+        const response = await axios.get<Recipe[]>(`${API_BASE_URL}/recipes/search?${params}`, {
+          withCredentials: true
+        });
         return response.data;
-      } catch (error) {
+      } catch (err: any) {
         toast({
           title: 'Error',
-          description: 'Failed to fetch recipes',
+          description: 'Failed to fetch recipes. Please make sure the backend server is running.',
           status: 'error',
-          duration: 3000,
+          duration: 5000,
+          isClosable: true,
         });
         return [];
       }
@@ -130,7 +146,7 @@ const Home = () => {
             <Center py={10}>
               <Spinner size="xl" color="teal.500" />
             </Center>
-          ) : error ? (
+          ) : isError ? (
             <Text textAlign="center" fontSize="lg" color="red.500">
               Error loading recipes
             </Text>
@@ -145,7 +161,27 @@ const Home = () => {
               width="100%"
             >
               {recipes.map((recipe) => (
-                <RecipeCard key={recipe._id} recipe={recipe} />
+                <RecipeCard 
+                  key={recipe._id} 
+                  recipe={recipe}
+                  onLike={async (recipeId) => {
+                    try {
+                      await axios.post(
+                        `${API_BASE_URL}/recipes/${recipeId}/like`,
+                        {},
+                        {
+                          headers: {
+                            Authorization: `Bearer ${auth.token}`,
+                          },
+                        }
+                      );
+                      // Invalidate and refetch recipes
+                      queryClient.invalidateQueries({ queryKey: ['recipes'] });
+                    } catch (err: any) {
+                      throw err;
+                    }
+                  }}
+                />
               ))}
             </SimpleGrid>
           )}
