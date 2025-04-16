@@ -1,33 +1,12 @@
-import {
-  Box,
-  Container,
-  Heading,
-  Text,
-  Image,
-  VStack,
-  HStack,
-  Badge,
-  List,
-  ListItem,
-  ListIcon,
-  OrderedList,
-  Divider,
-  Skeleton,
-  IconButton,
-  Button,
-  Textarea,
-  Avatar,
-  useToast,
-  Tooltip,
-} from '@chakra-ui/react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Box, Heading, Text, HStack, IconButton, VStack, Image, Avatar, Button, Container, Textarea, useToast } from '@chakra-ui/react';
+import { FaEdit, FaTrash, FaHeart, FaRegHeart } from 'react-icons/fa';
 import axios from 'axios';
-import { CheckCircleIcon } from '@chakra-ui/icons';
-import { API_BASE_URL } from '../config';
-import { FaHeart, FaRegHeart, FaEdit, FaTrash } from 'react-icons/fa';
 import { useAuth } from '../contexts/AuthContext';
 import { useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Skeleton } from '@chakra-ui/react';
+import { API_BASE_URL } from '../config';
 
 interface Recipe {
   _id: string;
@@ -90,12 +69,12 @@ const RecipeDetail = () => {
     return (
       <Container maxW="4xl" py={8}>
         <VStack spacing={6} align="stretch">
-          <Skeleton height="300px" />
-          <Skeleton height="40px" />
+          <Skeleton height="350px" borderRadius="2xl" />
+          <Skeleton height="40px" borderRadius="lg" />
           <VStack spacing={2}>
-            <Skeleton height="20px" />
-            <Skeleton height="20px" />
-            <Skeleton height="20px" />
+            <Skeleton height="20px" borderRadius="md" />
+            <Skeleton height="20px" borderRadius="md" />
+            <Skeleton height="20px" borderRadius="md" />
           </VStack>
         </VStack>
       </Container>
@@ -171,10 +150,13 @@ const RecipeDetail = () => {
 
     setIsSubmitting(true);
     try {
-      await axios.post(`${API_BASE_URL}/recipes/${recipe._id}/comments`, { content: comment }, {
-        headers: { Authorization: `Bearer ${token}` },
-        withCredentials: true,
-      });
+      await axios.post(`${API_BASE_URL}/recipes/${recipe?._id}/comments`, 
+        { content: comment }, 
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true,
+        }
+      );
       setComment('');
       queryClient.invalidateQueries({ queryKey: ['recipe', id] });
       toast({
@@ -227,160 +209,122 @@ const RecipeDetail = () => {
   };
 
   return (
-    <Container maxW="4xl" py={8}>
-      <VStack spacing={6} align="stretch">
-        <Box position="relative">
-          <Image
-            src={recipe.image_url || 'https://via.placeholder.com/800x400?text=No+Image'}
-            alt={recipe.title}
-            borderRadius="lg"
-            objectFit="cover"
-            maxH="400px"
-            w="100%"
-          />
-          {user && user._id === recipe.user_id && (
-            <HStack position="absolute" top={4} right={4} spacing={2}>
-              <IconButton
-                aria-label="Edit recipe"
-                icon={<FaEdit />}
-                colorScheme="blue"
-                onClick={() => navigate(`/edit-recipe/${id}`)}
-              />
-              <IconButton
-                aria-label="Delete recipe"
-                icon={<FaTrash />}
-                colorScheme="red"
-                isLoading={isDeleting}
-                onClick={handleDelete}
-              />
+    <Box minH="100vh" bgGradient="linear(to-br, orange.50, teal.50, white)" py={8}>
+      <Container maxW="4xl" py={4}>
+        <VStack spacing={8} align="stretch">
+          <Box>
+            <Image
+              src={recipe?.image_url || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=800&q=80'}
+              alt={recipe?.title}
+              borderRadius="2xl"
+              w="full"
+              maxH="350px"
+              objectFit="cover"
+              mb={4}
+              fallbackSrc="https://via.placeholder.com/600x350?text=No+Image"
+            />
+            <Heading size="2xl" color="teal.700" fontWeight="extrabold" mb={2} letterSpacing="tight">
+              {recipe?.title}
+            </Heading>
+            <HStack spacing={4} mb={4} color="gray.600">
+              <Text fontWeight="bold">By {recipe?.user_name || ''}</Text>
+              <Text>• {recipe?.cuisine_type || ''}</Text>
+              <Text>• {recipe?.cooking_time || ''}</Text>
+              <Text>• {recipe?.difficulty || ''}</Text>
             </HStack>
-          )}
-        </Box>
-
-        <Box>
-          <HStack justify="space-between" align="start" mb={2}>
-            <Heading size="xl">{recipe.title}</Heading>
-            <HStack spacing={2}>
-              <Tooltip label={user ? (recipe.likes.includes(user._id) ? 'Unlike' : 'Like') : 'Login to like'}>
-                <IconButton
-                  aria-label="Like recipe"
-                  icon={user && recipe.likes.includes(user._id) ? <FaHeart /> : <FaRegHeart />}
-                  colorScheme={user && recipe.likes.includes(user._id) ? 'red' : 'gray'}
-                  variant="ghost"
-                  isLoading={isLiking}
-                  onClick={handleLike}
-                />
-              </Tooltip>
-              <Text>{recipe.likes.length}</Text>
-            </HStack>
-          </HStack>
-          <Text fontSize="md" color="gray.600" mb={4}>
-            By {recipe.user_name}
-          </Text>
-          <HStack spacing={2} mb={4}>
-            <Badge colorScheme="teal">{recipe.cuisine_type}</Badge>
-            <Badge colorScheme="purple">{recipe.cooking_time}</Badge>
-            <Badge
-              colorScheme={
-                recipe.difficulty === 'Easy'
-                  ? 'green'
-                  : recipe.difficulty === 'Medium'
-                  ? 'yellow'
-                  : 'red'
-              }
-            >
-              {recipe.difficulty}
-            </Badge>
-          </HStack>
-          <Text fontSize="lg" color="gray.600">
-            {recipe.description}
-          </Text>
-        </Box>
-
-        <Divider />
-
-        <Box>
-          <Heading size="lg" mb={4}>
-            Ingredients
-          </Heading>
-          <List spacing={2}>
-            {ingredients.map((ingredient: string, index: number) => (
-              <ListItem key={index} display="flex" alignItems="start">
-                <ListIcon as={CheckCircleIcon} color="teal.500" mt={1} />
-                <Text>{ingredient.trim()}</Text>
-              </ListItem>
-            ))}
-          </List>
-        </Box>
-
-        <Divider />
-
-        <Box>
-          <Heading size="lg" mb={4}>
-            Instructions
-          </Heading>
-          <OrderedList spacing={4}>
-            {instructions.map((instruction: string, index: number) => (
-              <ListItem key={index} ml={4}>
-                <Text>{instruction.trim()}</Text>
-              </ListItem>
-            ))}
-          </OrderedList>
-        </Box>
-
-        <Divider />
-
-        <Box id="comments">
-          <Heading size="lg" mb={4}>
-            Comments ({recipe.comments.length})
-          </Heading>
-          
-          {user && (
-            <VStack spacing={4} mb={6} align="stretch">
-              <Textarea
-                placeholder="Write a comment..."
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-                resize="vertical"
-                minH="100px"
-              />
+            <HStack mb={4} spacing={3}>
               <Button
-                colorScheme="teal"
-                isLoading={isSubmitting}
-                onClick={handleComment}
-                alignSelf="flex-end"
+                leftIcon={(recipe?.likes || []).includes(user?._id ?? '') ? <FaHeart /> : <FaRegHeart />}
+                colorScheme={(recipe?.likes || []).includes(user?._id ?? '') ? 'orange' : 'gray'}
+                variant={(recipe?.likes || []).includes(user?._id ?? '') ? 'solid' : 'outline'}
+                size="md"
+                fontWeight="bold"
+                onClick={handleLike}
+                isLoading={isLiking}
+                borderRadius="full"
               >
-                Post Comment
+                {(recipe?.likes || []).length || 0} Like{(recipe?.likes || []).length === 1 ? '' : 's'}
               </Button>
-            </VStack>
-          )}
-
-          <VStack spacing={4} align="stretch">
-            {recipe.comments.map((comment: { content: string; user_name: string; created_at: string }, index: number) => (
-              <Box
-                key={index}
-                p={4}
-                bg="gray.50"
-                borderRadius="md"
-                borderWidth="1px"
-                borderColor="gray.200"
-              >
-                <HStack spacing={3} mb={2}>
-                  <Avatar size="sm" name={comment.user_name} />
-                  <VStack spacing={0} align="start">
-                    <Text fontWeight="bold">{comment.user_name}</Text>
-                    <Text fontSize="sm" color="gray.500">
-                      {new Date(comment.created_at).toLocaleDateString()}
-                    </Text>
-                  </VStack>
+              {user && user._id === recipe?.user_id && (
+                <HStack spacing={2}>
+                  <IconButton
+                    aria-label="Edit recipe"
+                    icon={<FaEdit />}
+                    colorScheme="orange"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigate(`/edit-recipe/${recipe?._id}`)}
+                    _hover={{ bg: 'orange.50', color: 'orange.500' }}
+                  />
+                  <IconButton
+                    aria-label="Delete recipe"
+                    icon={<FaTrash />}
+                    colorScheme="red"
+                    variant="outline"
+                    size="sm"
+                    isLoading={isDeleting}
+                    onClick={handleDelete}
+                    _hover={{ bg: 'red.50', color: 'red.400' }}
+                  />
                 </HStack>
-                <Text>{comment.content}</Text>
-              </Box>
-            ))}
-          </VStack>
-        </Box>
-      </VStack>
-    </Container>
+              )}
+            </HStack>
+          </Box>
+          <Box bg="orange.50" borderRadius="xl" p={6} shadow="sm" mb={4}>
+            <Heading size="md" color="orange.600" mb={2} letterSpacing="tight">Ingredients</Heading>
+            <Text whiteSpace="pre-line" color="gray.700">{recipe?.ingredients}</Text>
+          </Box>
+          <Box bg="teal.50" borderRadius="xl" p={6} shadow="sm" mb={4}>
+            <Heading size="md" color="teal.600" mb={2} letterSpacing="tight">Instructions</Heading>
+            <Text whiteSpace="pre-line" color="gray.700">{recipe?.instructions}</Text>
+          </Box>
+          <Box bg="whiteAlpha.900" borderRadius="xl" p={6} shadow="sm">
+            <Heading size="md" color="teal.700" mb={4} letterSpacing="tight">Comments</Heading>
+            {recipe?.comments?.length === 0 && (
+              <Text color="gray.400" mb={4}>No comments yet. Be the first to comment!</Text>
+            )}
+            <VStack spacing={4} align="stretch">
+              {(recipe?.comments || []).map((comment: { user_name: string; created_at: string; content: string }, idx: number) => (
+                <Box key={idx} bg="gray.50" p={4} borderRadius="lg" shadow="xs">
+                  <HStack>
+                    <Avatar size="sm" name={comment.user_name} bg="teal.200" color="teal.700" />
+                    <Text fontWeight="bold" color="teal.700">{comment.user_name}</Text>
+                    <Text color="gray.400" fontSize="xs">{new Date(comment.created_at).toLocaleString()}</Text>
+                  </HStack>
+                  <Text mt={2} color="gray.700">{comment.content}</Text>
+                </Box>
+              ))}
+            </VStack>
+            {user && (
+              <form onSubmit={(e) => { e.preventDefault(); handleComment(); }} style={{ marginTop: 24 }}>
+                <VStack spacing={2} align="stretch">
+                  <Textarea
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                    placeholder="Add a comment..."
+                    bg="gray.50"
+                    borderRadius="lg"
+                    size="md"
+                    minH="60px"
+                  />
+                  <Button
+                    type="submit"
+                    colorScheme="teal"
+                    borderRadius="full"
+                    fontWeight="bold"
+                    isLoading={isSubmitting}
+                    alignSelf="flex-end"
+                    px={8}
+                  >
+                    Post
+                  </Button>
+                </VStack>
+              </form>
+            )}
+          </Box>
+        </VStack>
+      </Container>
+    </Box>
   );
 };
 

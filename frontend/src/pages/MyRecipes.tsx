@@ -22,15 +22,22 @@ const MyRecipes = () => {
     queryFn: async () => {
       try {
         const response = await axios.get(`${API_BASE_URL}/recipes/user/${user?._id}`, {
+          headers: { Authorization: `Bearer ${token}` },
           withCredentials: true
         });
         return response.data;
       } catch (err) {
         console.error('Error fetching my recipes:', err);
+        toast({
+          title: 'Error',
+          description: 'Failed to fetch your recipes. Please make sure you are logged in.',
+          status: 'error',
+          duration: 3000,
+        });
         return [];
       }
     },
-    enabled: !!user,
+    enabled: !!user && !!token,
   });
 
   if (!user) {
@@ -43,16 +50,17 @@ const MyRecipes = () => {
 
   if (isLoading) {
     return (
-      <Box textAlign="center" py={10}>
-        <Text>Loading your recipes...</Text>
+      <Box textAlign="center" py={20}>
+        <Text color="teal.400" fontSize="xl">Loading your recipes...</Text>
       </Box>
     );
   }
 
   if (recipes.length === 0) {
     return (
-      <Box textAlign="center" py={10}>
-        <Heading size="lg">You haven't created any recipes yet</Heading>
+      <Box textAlign="center" py={20}>
+        <Heading size="lg" color="teal.500" mb={2}>You haven't created any recipes yet</Heading>
+        <Text color="gray.500">Share your first recipe with the community!</Text>
       </Box>
     );
   }
@@ -86,27 +94,33 @@ const MyRecipes = () => {
   };
 
   return (
-    <Box>
-      <Heading mb={6}>My Recipes</Heading>
-      <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
+    <Box minH="100vh" bgGradient="linear(to-br, orange.50, teal.50, white)" px={{ base: 2, md: 8 }} py={8}>
+      <Heading mb={8} textAlign="center" color="teal.600" fontWeight="extrabold" letterSpacing="tight" fontSize={{ base: '2xl', md: '3xl' }}>
+        My Recipes
+      </Heading>
+      <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={8}>
         {recipes.map((recipe: any) => (
           <Box key={recipe._id} position="relative">
             <RecipeCard recipe={recipe} />
-            <HStack position="absolute" top={2} right={2} spacing={2}>
+            <HStack position="absolute" top={3} right={3} spacing={2}>
               <IconButton
                 aria-label="Edit recipe"
                 icon={<FaEdit />}
-                colorScheme="blue"
+                colorScheme="orange"
+                variant="outline"
                 size="sm"
                 onClick={() => navigate(`/edit-recipe/${recipe._id}`)}
+                _hover={{ bg: 'orange.50', color: 'orange.500' }}
               />
               <IconButton
                 aria-label="Delete recipe"
                 icon={<FaTrash />}
                 colorScheme="red"
+                variant="outline"
                 size="sm"
                 isLoading={isDeleting}
                 onClick={() => handleDelete(recipe._id)}
+                _hover={{ bg: 'red.50', color: 'red.400' }}
               />
             </HStack>
           </Box>

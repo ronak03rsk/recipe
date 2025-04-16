@@ -13,39 +13,45 @@ const Navbar = () => {
   };
 
   return (
-    <Box 
-      bg="white" 
-      boxShadow="sm" 
-      position="sticky" 
-      top={0} 
+    <Box
+      bg="whiteAlpha.900"
+      boxShadow="md"
+      position="sticky"
+      top={0}
       zIndex={1000}
-      borderBottom="1px"
-      borderColor="gray.100"
+      borderBottom="2px"
+      borderColor="teal.100"
+      transition="box-shadow 0.2s"
     >
       <Container maxW="container.xl" py={3}>
         <Flex justify="space-between" align="center">
-          <ChakraLink 
-            as={RouterLink} 
+          <ChakraLink
+            as={RouterLink}
             to="/"
             _hover={{ textDecoration: 'none' }}
           >
-            <Text 
-              fontSize="2xl" 
-              fontWeight="bold" 
+            <Text
+              fontSize={{ base: 'xl', md: '2xl' }}
+              fontWeight="bold"
               bgGradient="linear(to-r, teal.500, teal.300)"
               bgClip="text"
+              letterSpacing="tight"
             >
               RecipeShare
             </Text>
           </ChakraLink>
 
-          <HStack spacing={8}>
-            <ChakraLink 
-              as={RouterLink} 
-              to="/" 
+          <HStack spacing={{ base: 2, md: 8 }}>
+            <ChakraLink
+              as={RouterLink}
+              to="/"
               color="gray.600"
-              fontWeight="medium"
-              _hover={{ color: 'teal.500', textDecoration: 'none' }}
+              fontWeight="semibold"
+              px={2}
+              py={1}
+              borderRadius="md"
+              _hover={{ color: 'teal.600', bg: 'teal.50', textDecoration: 'none' }}
+              _activeLink={{ color: 'teal.700', fontWeight: 'bold' }}
             >
               Discover
             </ChakraLink>

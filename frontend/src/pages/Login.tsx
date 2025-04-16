@@ -52,20 +52,20 @@ const Login = () => {
       display="flex"
       alignItems="center"
       justifyContent="center"
-      bg="gray.50"
-      p={4}
+      bgGradient="linear(to-br, teal.50, teal.100, white)"
+      p={2}
     >
       <Box
-        p={8}
+        p={{ base: 4, md: 8 }}
         borderWidth={1}
-        borderRadius="lg"
-        boxShadow="lg"
-        bg="white"
+        borderRadius="2xl"
+        boxShadow="2xl"
+        bg="whiteAlpha.900"
         w="full"
-        maxW="md"
+        maxW={{ base: '95vw', md: 'md' }}
       >
         <VStack spacing={6} align="stretch">
-          <Heading textAlign="center" size="xl" color="teal.500">
+          <Heading textAlign="center" size="xl" color="teal.600" letterSpacing="tight">
             Welcome Back
           </Heading>
           <form onSubmit={handleSubmit}>
@@ -95,6 +95,9 @@ const Login = () => {
                 colorScheme="teal"
                 size="lg"
                 width="100%"
+                borderRadius="full"
+                fontWeight="bold"
+                shadow="sm"
                 isLoading={isLoading}
                 loadingText="Logging in..."
               >
@@ -102,9 +105,9 @@ const Login = () => {
               </Button>
             </VStack>
           </form>
-          <Text textAlign="center">
+          <Text fontSize="sm" color="gray.600" textAlign="center">
             Don't have an account?{' '}
-            <Link as={RouterLink} to="/register" color="teal.500">
+            <Link as={RouterLink} to="/register" color="teal.500" fontWeight="bold" _hover={{ textDecoration: 'underline' }}>
               Register here
             </Link>
           </Text>

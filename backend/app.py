@@ -16,14 +16,7 @@ def serialize_object(obj):
     raise TypeError(f'Type {type(obj)} not serializable')
 
 app = Flask(__name__)
-CORS(app, resources={
-    r"/*": {
-        "origins": ["http://localhost:5173"],
-        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        "allow_headers": ["Content-Type", "Authorization"],
-        "supports_credentials": True
-    }
-})
+CORS(app, resources={r"/*": {"origins": "*", "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"], "allow_headers": ["Content-Type", "Authorization"], "supports_credentials": True}})
 
 
 
@@ -126,22 +119,28 @@ def login():
 def get_favorite_recipes():
     user_id = get_current_user_id()
     recipes = list(db.recipes.find({'likes': ObjectId(user_id)}))
+    result = []
     for recipe in recipes:
         recipe['_id'] = str(recipe['_id'])
         recipe['user_id'] = str(recipe['user_id'])
         recipe['likes'] = [str(like) for like in recipe.get('likes', [])]
-    return json.dumps(recipes, default=serialize_object), 200, {'Content-Type': 'application/json'}
+        recipe['comments'] = recipe.get('comments', [])
+        result.append(recipe)
+    return jsonify(result), 200
 
 @app.route('/api/recipes/user/<user_id>', methods=['GET'])
 @jwt_required
 def get_user_recipes(user_id):
     try:
         recipes = list(db.recipes.find({'user_id': ObjectId(user_id)}).sort('created_at', -1))
+        result = []
         for recipe in recipes:
             recipe['_id'] = str(recipe['_id'])
             recipe['user_id'] = str(recipe['user_id'])
             recipe['likes'] = [str(like) for like in recipe.get('likes', [])]
-        return json.dumps(recipes, default=serialize_object), 200, {'Content-Type': 'application/json'}
+            recipe['comments'] = recipe.get('comments', [])
+            result.append(recipe)
+        return jsonify(result), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -232,29 +231,21 @@ def search_recipes():
 @jwt_required
 def like_recipe(recipe_id):
     user_id = get_current_user_id()
-    
     try:
         recipe = db.recipes.find_one({'_id': ObjectId(recipe_id)})
         if not recipe:
             return jsonify({'error': 'Recipe not found'}), 404
-
         likes = recipe.get('likes', [])
         user_id_obj = ObjectId(user_id)
-
+        liked = False
         if str(user_id_obj) in [str(like) for like in likes]:
-            # Unlike
-            db.recipes.update_one(
-                {'_id': ObjectId(recipe_id)},
-                {'$pull': {'likes': user_id_obj}}
-            )
-            return jsonify({'message': 'Recipe unliked successfully'}), 200
+            db.recipes.update_one({'_id': ObjectId(recipe_id)}, {'$pull': {'likes': user_id_obj}})
+            liked = False
         else:
-            # Like
-            db.recipes.update_one(
-                {'_id': ObjectId(recipe_id)},
-                {'$addToSet': {'likes': user_id_obj}}
-            )
-            return jsonify({'message': 'Recipe liked successfully'}), 200
+            db.recipes.update_one({'_id': ObjectId(recipe_id)}, {'$addToSet': {'likes': user_id_obj}})
+            liked = True
+        updated = db.recipes.find_one({'_id': ObjectId(recipe_id)})
+        return jsonify({'liked': liked, 'likeCount': len(updated.get('likes', []))}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -264,23 +255,17 @@ def add_comment(recipe_id):
     data = request.json
     user_id = get_current_user_id()
     user = db.users.find_one({'_id': ObjectId(user_id)})
-
     if not data.get('content'):
         return jsonify({'error': 'Comment content is required'}), 400
-
     try:
         comment = Comment(
             content=data['content'],
             user_id=ObjectId(user_id),
             user_name=user['name']
         )
-
-        db.recipes.update_one(
-            {'_id': ObjectId(recipe_id)},
-            {'$push': {'comments': comment.to_dict()}}
-        )
-
-        return jsonify({'message': 'Comment added successfully'}), 201
+        db.recipes.update_one({'_id': ObjectId(recipe_id)}, {'$push': {'comments': comment.to_dict()}})
+        updated = db.recipes.find_one({'_id': ObjectId(recipe_id)})
+        return jsonify({'message': 'Comment added successfully', 'commentsCount': len(updated.get('comments', [])), 'comments': updated.get('comments', [])}), 201
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

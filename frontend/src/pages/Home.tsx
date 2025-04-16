@@ -98,68 +98,60 @@ const Home = () => {
   });
 
   return (
-    <Box width="100vw" minH="100vh" bg="gray.50" overflowX="hidden">
+    <Box width="100vw" minH="100vh" bgGradient="linear(to-br, teal.50, teal.100, white)" overflowX="hidden" pb={8}>
       <Container maxW="8xl" py={8} px={{ base: 4, md: 8 }}>
         <VStack spacing={8} align="stretch" width="100%">
-          <Box width="100%">
-            <Heading mb={6} textAlign={{ base: "center", md: "left" }}>
-              Discover Delicious Recipes
-            </Heading>
-            <Grid
-              templateColumns={{ base: "1fr", md: "3fr 1fr" }}
-              gap={6}
-              width="100%"
-            >
-              <InputGroup size="lg">
+            <Grid templateColumns={{ base: '1fr', md: '2fr 1fr' }} gap={4} alignItems="center">
+              <InputGroup>
                 <InputAddon>
-                  <Box p={2}>
-                    <SearchIcon color="gray.500" />
-                  </Box>
+                  <SearchIcon color="teal.400" />
                 </InputAddon>
                 <Input
-                  placeholder="Search recipes by name, ingredients, or description..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  bg="white"
-                  size="lg"
-                  _focus={{ boxShadow: "outline" }}
+                  placeholder="Search for recipes, ingredients, or cuisine..."
+                  bg="transparent"
+                  borderRadius="full"
+                  border="none"
+                  _focus={{ bg: 'teal.50', borderColor: 'teal.300' }}
                 />
               </InputGroup>
               <Select
-                placeholder="All Cuisines"
                 value={cuisineType}
                 onChange={(e) => setCuisineType(e.target.value)}
-                bg="white"
                 size="lg"
-                _focus={{ boxShadow: "outline" }}
+                bg="white"
+                borderRadius="full"
+                shadow="sm"
+                maxW={{ base: '100%', md: '250px' }}
+                _focus={{ bg: 'teal.50', borderColor: 'teal.300' }}
               >
-                {cuisineOptions.map(option => (
+                {cuisineOptions.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
                   </option>
                 ))}
               </Select>
             </Grid>
-          </Box>
 
           {isLoading ? (
-            <Center py={10}>
-              <Spinner size="xl" color="teal.500" />
+            <Center py={20}>
+              <Spinner size="xl" color="teal.400" thickness="5px" speed="0.6s" />
             </Center>
           ) : isError ? (
-            <Text textAlign="center" fontSize="lg" color="red.500">
-              Error loading recipes
-            </Text>
+            <Center py={20}>
+              <Text color="red.500" fontSize="lg" fontWeight="semibold">
+                Failed to load recipes. Please check your connection or try again later.
+              </Text>
+            </Center>
           ) : recipes.length === 0 ? (
-            <Text textAlign="center" fontSize="lg">
-              No recipes found. Try a different search term or cuisine type.
-            </Text>
+            <Center py={20}>
+              <Text color="gray.500" fontSize="xl" fontWeight="semibold">
+                No recipes found. Try a different search or add your own!
+              </Text>
+            </Center>
           ) : (
-            <SimpleGrid
-              columns={{ base: 1, sm: 2, lg: 3, xl: 4 }}
-              spacing={6}
-              width="100%"
-            >
+            <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={8}>
               {recipes.map((recipe) => (
                 <RecipeCard 
                   key={recipe._id} 
